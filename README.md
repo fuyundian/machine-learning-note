@@ -36,10 +36,9 @@ $$
 
 **有标签样本**同时包含特征和标签。具体来说：
 
-$$
-  labeled examples: {features, label}: (x, y)
 
-$$
+ labeled examples: {features, label}: (x, y)
+
 
 使用有标签样本来**训练**模型。在我们的垃圾邮件检测器示例中，有标签样本是指用户明确标记为“垃圾邮件”或“不是垃圾邮件”的个别电子邮件。
 
@@ -55,10 +54,8 @@ $$
 
 **无标签样本**包含特征，但不包含标签。具体来说：
 
-$$
-  unlabeled examples: {features, ?}: (x, ?)
+ unlabeled examples: {features, ?}: (x, ?)
 
-$$
 
 以下是来自同一住房数据集的 3 个无标签样本（不包括 `medianHouseValue`）：
 
