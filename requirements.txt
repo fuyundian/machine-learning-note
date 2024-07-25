@@ -1,2 +1,4 @@
-numpy
-pandas
+numpy~=1.26.1
+pandas~=2.2.2
+tensorflow~=2.17.0
+matplotlib~=3.9.1
