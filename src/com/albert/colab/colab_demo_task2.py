@@ -1,9 +1,12 @@
+import os
+
 import pandas as pd
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras.optimizers import RMSprop
 
 
+# 创建模型
 def build_model(my_learning_rate):
     # """创建并编译一个简单的线性回归模型。"""
     # 大多数简单的 tf.keras 模型都是顺序的。
@@ -22,14 +25,12 @@ def build_model(my_learning_rate):
     return model
 
 
-def train_model(model, feature, label, epochs, batch_size):
-    # """Train the model by feeding it data."""
-
+def train_model(model, training_df, feature, label, epochs, batch_size):
     # 将特征值和标签值输入
     # 模型。模型将训练指定数量
     # epochs，逐渐学习特征值如何
     # 与标签值相关。
-    history = model.fit(x=feature, y=label, batch_size=batch_size, epochs=epochs)
+    history = model.fit(x=training_df[feature], y=training_df[label], batch_size=batch_size, epochs=epochs)
 
     # 收集训练模型的权重和偏差。
     trained_weight = model.get_weights()[0][0]
@@ -49,23 +50,21 @@ def train_model(model, feature, label, epochs, batch_size):
 
 
 # @title 定义绘图函数
-def plot_the_model(trained_weight, trained_bias, feature, label):
-    # ""根据训练特征和标签绘制经过训练的模型。""
-
+def plot_the_model(trained_weight, training_df, trained_bias, feature, label):
     # 标记轴。
-    plt.xlabel("feature")
-    plt.ylabel("label")
-    # 绘制特征值与标签值的图。
-    plt.scatter(feature, label)
+    plt.xlabel(feature)
+    plt.ylabel(label)
+    # 根据数据集的 200 个随机点创建散点图。
+    random_examples = training_df.sample(n=200)
+    plt.scatter(random_examples[feature], random_examples[label])
 
     # 创建一条代表模型的红线。红线开始
     # 在坐标 (x0, y0) 处并在坐标 (x1, y1) 处结束。
     x0 = 0
     y0 = trained_bias
-    x1 = feature[-1]
+    x1 = random_examples[feature].max()
     y1 = trained_bias + (trained_weight * x1)
     plt.plot([x0, x1], [y0, y1], c='r')
-
     # 渲染散点图和红线。
     plt.show()
 
@@ -78,6 +77,39 @@ def plot_the_loss_curve(epochs, rmse):
 
     plt.plot(epochs, rmse, label="Loss")
     plt.legend()
-    plt.ylim([rmse.min(), rmse.max()])
+    plt.ylim([rmse.min() * 0.97, rmse.max()])
     plt.show()
 
+
+def read_csv():
+    pd.options.display.max_rows = 10
+    pd.options.display.float_format = "{:.1f}".format
+    # 获取文件目录
+    curPath = os.path.abspath(os.path.dirname(__file__))
+    # 获取项目根路径，内容为当前项目的名字
+    rootPath = curPath[:curPath.find('machine-learning-note') + len('machine-learning-note')]
+    # # 构建 CSV 文件的完整路径
+    file_path = os.path.join(rootPath, 'src/resouces/california_housing_train.csv')
+    # # 读取 CSV 文件
+    training_df = pd.read_csv(file_path)
+    training_df["median_house_value"] /= 1000.0
+
+    # Print the first rows of the pandas DataFrame.
+    training_df.head()
+    training_df.describe()
+    return training_df
+
+
+def predict_house_values(n, training_df, my_model, feature, label):
+    """Predict house values based on a feature."""
+
+    batch = training_df[feature][10000:10000 + n]
+    predicted_values = my_model.predict_on_batch(x=batch)
+
+    print("feature   label          predicted")
+    print("  value   value          value")
+    print("          in thousand$   in thousand$")
+    print("--------------------------------------")
+    for i in range(n):
+        print("%5.0f %6.0f %15.0f" % (
+        training_df[feature][10000 + i], training_df[label][10000 + i], predicted_values[i][0]))
